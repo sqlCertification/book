@@ -1,0 +1,311 @@
+
+Welcome to SQL CERTIFICATION learning 
+
+
+1.  SQL up and running:
+
+For a seamless installation experience, visit the GitHub repository at 
+https://github.com/EmblocSoft/PostgreSQL 
+and download the graphical installer program. This easy-to-use tool will equip you with everything you need to dive into the world of SQL and 
+start building your database skills in no time!
+
+
+p1:
+(MySQL)
+CREATE TABLE t1 (i INT, d1 DOUBLE, d2 DOUBLE);
+
+INSERT INTO t1 VALUES 
+(1, 101.40, 31.40), 
+(1, -70.00, 0.00),
+(2, 0.00, 0.00), 
+(2, -13.20, 0.00), 
+(2, 59.60, 46.40),
+(2, 30.40, 30.40), 
+(3, 37.00, 7.40), 
+(3, -29.60, 0.00),
+(4, 60.00, 15.40), 
+(4, -10.60, 0.00), 
+(4, -34.00, 0.00),
+(5, 33.00, 0.00), 
+(5, -25.80, 0.00), 
+(5, 0.00, 7.20),
+(6, 0.00, 0.00), 
+(6, -51.40, 0.00);
+
+SELECT i, SUM(d1) AS a, SUM(d2) AS b
+FROM t1 GROUP BY i HAVING SUM(d1) <> SUM(d2) ;
+
+
+
+(PostgreSQL)
+CREATE TABLE t1 (i INT, d1 DOUBLE PRECISION , d2 DOUBLE PRECISION);
+
+INSERT INTO t1 VALUES 
+(1, 101.40, 31.40), 
+(1, -70.00, 0.00),
+(2, 0.00, 0.00), 
+(2, -13.20, 0.00), 
+(2, 59.60, 46.40),
+(2, 30.40, 30.40), 
+(3, 37.00, 7.40), 
+(3, -29.60, 0.00),
+(4, 60.00, 15.40), 
+(4, -10.60, 0.00), 
+(4, -34.00, 0.00),
+(5, 33.00, 0.00), 
+(5, -25.80, 0.00), 
+(5, 0.00, 7.20),
+(6, 0.00, 0.00), 
+(6, -51.40, 0.00);
+
+SELECT i, SUM(d1) AS a, SUM(d2) AS b
+FROM t1 
+GROUP BY i 
+HAVING SUM(d1) <> SUM(d2) 
+ORDER BY i;
+
+SELECT   i, SUM(d1) AS a, SUM(d2) AS b
+FROM     t1 
+GROUP BY i 
+HAVING (ROUND(SUM(d1)::NUMERIC - SUM(d2)::NUMERIC)) <> 0 
+ORDER BY i;
+
+
+
+p2:
+CREATE TABLE t2 (
+    my_int               INT, 
+    my_smallint          SMALLINT,
+    my_bigint            BIGINT,
+    my_numeric           NUMERIC,
+    my_real              REAL,
+    my_double            DOUBLE PRECISION, 
+    my_smallserial       SMALLSERIAL,
+    my_serial            SERIAL,
+    my_bigserial         BIGSERIAL,
+    my_money             MONEY,
+    my_char_varying      CHARACTER VARYING(20),
+    my_varchar           VARCHAR(20),
+    my_char              CHAR(20),
+    my_text              TEXT,
+    my_bytea             BYTEA,
+    my_timestamp_0       TIMESTAMP(0) WITHOUT TIME ZONE,
+    my_timestamp_3       TIMESTAMP(3) WITHOUT TIME ZONE,
+    my_timestamp_6       TIMESTAMP(6) WITHOUT TIME ZONE,
+    my_timestamp_tz_0    TIMESTAMP(0) WITH TIME ZONE,
+    my_timestamp_tz_3    TIMESTAMP(3) WITH TIME ZONE,
+    my_timestamp_tz_6    TIMESTAMP(6) WITH TIME ZONE,
+    my_date              DATE,
+    my_time              TIME(6),
+    my_time_tz           TIME(6) WITH TIME ZONE,
+    my_interval_0        INTERVAL MINUTE TO SECOND (0),
+    my_interval_3        INTERVAL MINUTE TO SECOND (3),
+    my_interval_6        INTERVAL MINUTE TO SECOND (6),
+    my_boolean           BOOLEAN,
+    my_xml               XML,
+    my_json              JSON,
+    my_jsonb             JSONB,
+    my_char_array        CHAR[],
+    my_text_array        TEXT[],
+    my_uuid              UUID,
+    my_inet              INET,
+    my_cidr              CIDR,
+    my_macaddr           MACADDR,
+    my_macaddr8          MACADDR8,
+    my_tsvector          TSVECTOR);
+
+
+
+p2.1
+INSERT INTO t2 ( my_int,  my_real, my_double)
+VALUES (1, 1.12345678901234567890, 1.123456789012345678901234567890);
+
+SELECT my_int, my_real, my_double, my_serial FROM t2 WHERE my_int = 1;
+
+
+
+p2.2
+INSERT INTO t2 (my_int, my_numeric)
+VALUES (2, 12345678901234567890.12345678901234567890);
+
+SELECT my_int, my_numeric, my_smallserial, my_bigserial FROM t2 WHERE my_int = 2;
+
+
+
+p2.3
+INSERT INTO t2 (my_int, my_numeric) VALUES (3, 'Infinity');
+INSERT INTO t2 (my_int, my_numeric) VALUES (4, '-Infinity');
+INSERT INTO t2 (my_int, my_numeric) VALUES (5, 'NaN');
+
+SELECT my_int, my_numeric FROM t2;
+SELECT 'Infinity'::NUMERIC /  'Infinity'::NUMERIC AS t;
+SELECT 'Infinity'::NUMERIC /  '-Infinity'::NUMERIC AS t;
+
+
+
+p2.4
+INSERT INTO t2 (my_int, my_money)
+VALUES (6, 12345678.912345678901234567890);
+
+SELECT my_int, my_money, my_serial FROM t2 WHERE my_int = 6;
+SELECT CURRVAL(pg_get_serial_sequence('t2', 'my_serial'));
+
+
+
+p2.5
+SELECT my_int, my_money / 5 AS amount FROM t2 WHERE my_int = 6;
+SELECT my_int, my_money / 1.5 as amount FROM t2 WHERE my_int = 6;
+SELECT my_int, (my_money::NUMERIC / 1.5)::MONEY as amount FROM t2 WHERE my_int = 6;
+
+
+
+p2.6
+INSERT INTO t2 (my_int, my_char_varying, my_varchar, my_char, my_text)
+VALUES (
+7, 'abcdefghijklmnopqrst', 'abcdefghijklmnopqrst', 
+'abcdefghijklmnopqrstu', 'abcdefghijklmnopqrstuvwxyz');
+
+SELECT my_char_varying, my_varchar, my_char, my_text FROM t2 WHERE my_int =7;
+
+
+
+p2.7
+INSERT INTO t2 (my_int, my_char_varying, my_varchar, my_char, my_text)
+VALUES (8, 'abcdefghijklmnopqrst', 'abcdefghijklmnopqrst', 
+'abcdefghijklmnopqrstu', 'abcdefghijklmnopqrstuvwxyz');
+
+SELECT my_char_varying, my_varchar, my_char, my_text FROM t2 WHERE my_int =7;
+
+INSERT INTO t2 (my_int, my_char_varying, my_varchar, my_char, my_text)
+VALUES (9, 'abcdefghijklmnopqrstu', 'abcdefghijklmnopqrstu', 'abcdefghijklmnopqrstu', 'abcdefghijklmnopqrstuvwxyz');
+(This will return ERROR)
+
+INSERT INTO t2 (my_int, my_char_varying, my_varchar, my_char, my_text)
+VALUES (
+9, 'abcdefghijklmnopqrstuvwxyz'::VARCHAR(20), ' abcdefghijklmnopqrstuvwxyz '::VARCHAR(20), 
+' abcdefghijklmnopqrstuvwxyz '::CHAR(20), 'abcdefghijklmnopqrstuvwxyz');
+
+SELECT my_char_varying, my_varchar, my_char, my_text FROM t2 WHERE my_int = 9;
+
+
+
+p2.8
+INSERT INTO t2 (my_int, my_bytea)
+VALUES (10, E'\\xDEADBEEF');
+
+SELECT my_int, my_bytea FROM t2 WHERE my_int = 10;
+
+SET bytea_output = 'hex';
+SELECT my_int, my_bytea FROM t2 WHERE my_int = 10; -- same SELECT statement
+
+SET bytea_output = 'escape';
+SELECT my_int, my_bytea FROM t2 WHERE my_int = 10;  -- same SELECT statement
+
+
+
+p2.9
+INSERT INTO t2 (
+    my_int,
+    my_timestamp_0,         --TIMESTAMP(0) 
+    my_timestamp_3,         --TIMESTAMP(3)
+    my_timestamp_6,         --TIMESTAMP(6)
+    my_timestamp_tz_0,      --TIMESTAMP(0) WITH TIME ZONE
+    my_timestamp_tz_3,      --TIMESTAMP(3) WITH TIME ZONE
+    my_timestamp_tz_6,      --TIMESTAMP(6) WITH TIME ZONE
+    my_date,
+    my_time,                --TIME(6)
+    my_time_tz              --TIME(6) WITH TIME ZONE
+)
+VALUES (
+    11,
+    TIMESTAMP '2023-08-03 12:34:56',
+    TIMESTAMP '2023-08-03 12:34:56.789',
+    TIMESTAMP '2023-08-03 12:34:56.123456',
+    TIMESTAMPTZ '2023-08-03 12:34:56+00:00',
+    TIMESTAMPTZ '2023-08-03 12:34:56.789+00:00',
+    TIMESTAMPTZ '2023-08-03 12:34:56.123456+00:00',
+    DATE '2023-08-03',
+    TIME '12:34:56',
+    TIME '12:34:56+00:00'
+);
+
+\x on  
+
+SELECT my_int, my_timestamp_0, my_timestamp_3,my_timestamp_6,
+       my_timestamp_tz_0,my_timestamp_tz_3, my_timestamp_tz_6,
+       my_date, my_time, my_time_tz
+FROM   t2 
+WHERE  my_int = 11;
+
+
+
+
+p2.10
+INSERT INTO t2 (my_int, my_date, my_time, my_time_tz)
+VALUES (
+    12,
+    'now'::DATE,
+    'allballs'::TIME,
+    'allballs'::TIME WITH TIME ZONE
+);
+
+SELECT my_int, my_date, my_time, my_time_tz FROM t2 WHERE my_int = 12;  
+  
+INSERT INTO t2 (
+    my_int, 
+    my_date,
+    my_time,
+    my_timestamp_tz_0
+)
+VALUES (
+    13,
+    'yesterday'::DATE,
+    'now'::TIME,
+    'now'::TIMESTAMP WITH TIME ZONE
+);
+
+SELECT my_int, my_date, my_time, my_timestamp_tz_0 FROM t2 WHERE my_int = 13;
+
+
+
+p2.11
+INSERT INTO t2 (
+    my_int,
+    my_timestamp_0,         --TIMESTAMP(0) 
+    my_timestamp_3,         --TIMESTAMP(3)
+    my_timestamp_6,         --TIMESTAMP(6)
+    my_timestamp_tz_0,      --TIMESTAMP(0) WITH TIME ZONE
+    my_timestamp_tz_3,      --TIMESTAMP(3) WITH TIME ZONE
+    my_timestamp_tz_6       --TIMESTAMP(6) WITH TIME ZONE
+)
+VALUES (
+    14,
+    TIMESTAMP '2023-12-31 23:59:59',
+    TIMESTAMP '2024-01-01 00:00:00.000',
+    TIMESTAMP '2025-01-01 00:00:00.000000',
+    TIMESTAMPTZ '2023-12-31 23:59:59+08:00',
+    TIMESTAMPTZ '2024-01-01 00:00:00.000+08:00',
+    TIMESTAMPTZ '2025-01-01 00:00:00.000000+08:00'
+);
+ 
+SELECT
+     my_int,
+     my_timestamp_3 - my_timestamp_0        AS t1_duration,
+     my_timestamp_6 - my_timestamp_0        AS t2_duration,
+     my_timestamp_tz_3 - my_timestamp_tz_0  AS t3_duration,
+     my_timestamp_tz_6 - my_timestamp_tz_3  AS t4_duration
+FROM t2
+WHERE my_int = 14;
+
+SELECT
+    my_int,
+    EXTRACT(EPOCH FROM (my_timestamp_3 - my_timestamp_0))         AS t1_duration,
+    EXTRACT(EPOCH FROM (my_timestamp_6 - my_timestamp_0))         AS t2_duration,
+    EXTRACT(EPOCH FROM (my_timestamp_6 - my_timestamp_3))         AS t3_duration,
+    EXTRACT(EPOCH FROM (my_timestamp_tz_3 - my_timestamp_tz_0 ))  AS t4_duration,
+    EXTRACT(EPOCH FROM (my_timestamp_tz_6 - my_timestamp_tz_0 ))  AS t5_duration,
+    EXTRACT(EPOCH FROM (my_timestamp_tz_6 - my_timestamp_tz_3 ))  AS t6_duration
+FROM t2
+WHERE my_int = 14;
+
+
