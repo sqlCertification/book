@@ -309,3 +309,890 @@ FROM t2
 WHERE my_int = 14;
 
 
+
+p2.12
+INSERT INTO t2 (
+    my_int,
+    my_timestamp_0,         --TIMESTAMP(0) 
+    my_timestamp_3          --TIMESTAMP(3)
+)
+VALUES (
+    15,
+    TIMESTAMP '2023-12-31 23:59:59',
+    TIMESTAMP '2023-12-31 23:59:59'  + 
+     INTERVAL '2 Years 3 Months 17 Days 3 Hours 20 Minutes 8 Seconds'
+);
+
+
+SELECT
+      my_int,
+      my_timestamp_0,
+      my_timestamp_3,
+      my_timestamp_3 - my_timestamp_0        AS t1_duration
+FROM  t2
+WHERE my_int = 15;
+
+SELECT TO_CHAR(INTERVAL '3 Hours 20 Minutes 8 Seconds', 'HH12:MI:SS') AS timing;
+SELECT (INTERVAL '1 Year 2 Months 1 Day 3 Hours 20 Minutes 1 Second') AS timing;
+
+SELECT EXTRACT(HOURS FROM INTERVAL '1 Year 2 Months 1 Day 3 Hours 20 Minutes 1 Second') 
+AS timing;
+
+CREATE TABLE event (
+    event_name VARCHAR(100),
+    event_duration INTERVAL(4)
+);
+
+INSERT INTO event (event_name, event_duration)
+VALUES ('Meeting', INTERVAL '3 hours 30 minutes 15.1234 seconds');
+
+SELECT * FROM event;
+
+
+
+p2.13
+INSERT INTO t2 (
+    my_int,
+    my_varchar,         
+    my_boolean          
+)
+VALUES (
+    16,
+    'Buy groceries', 
+    TRUE
+);
+
+SELECT
+      my_int,
+      my_varchar,         
+      my_boolean          
+FROM  t2
+WHERE my_int = 16;
+
+SELECT 'yes'::BOOLEAN AS is_true, NULL::BOOLEAN AS is_false;
+
+
+
+p2.14
+CREATE TYPE MOOD AS ENUM ('sad', 'ok', happy');
+
+CREATE DOMAIN POSTAL_CODE AS TEXT
+CHECK(VALUE ~ '^\d{5}$' OR VALUE ~ '^\d{5}-\d{4}$');
+
+CREATE TABLE t3 (
+   my_int          INT,
+   my_mood         MOOD,
+   my_postal_code  POSTAL_CODE);
+
+INSERT INTO t3 (
+    my_int,
+    my_mood,         
+    my_postal_code          
+)
+VALUES (
+    1,
+    'happy', 
+    '01234-1234'
+);
+
+SELECT my_int, my_mood, my_postal_code FROM t3 WHERE my_int =1;
+
+
+
+
+p2.15
+INSERT INTO t2 (my_int, my_json) --JSON
+VALUES (
+   17,
+   '{"title": "DBA Guidebook", "author": "Moss", "published_year": 2023}'
+);
+
+SELECT 
+   my_int, 
+   my_json->>'title' AS title, 
+   my_json->>'author' AS author, 
+  (my_json->>'published_year')::INTEGER AS published_year
+FROM t2 
+WHERE my_int = 17;
+
+INSERT INTO t2 (my_int, my_jsonb)  --JSONB
+VALUES (
+   18,
+   '{"title": "DBA Guidebook", "author": "Moss", "published_year": 2023}'
+);
+
+SELECT 
+   my_int, 
+   my_jsonb->>'title' AS title, 
+   my_jsonb->>'author' AS author, 
+  (my_jsonb->>'published_year')::integer AS published_year
+FROM t2 
+WHERE my_int = 18;
+
+
+
+p2.16
+SELECT 
+   my_int, 
+   my_json->>'title' AS title, 
+   my_json->>'author' AS author, 
+  (my_json->>'published_year')::integer AS published_year
+FROM t2 
+WHERE my_int = 17;
+
+SELECT 
+   my_int, 
+   my_json->'title' AS title, 
+   my_json->'author' AS author, 
+  (my_json->'published_year') AS published_year
+FROM t2 
+WHERE my_int = 17;
+
+
+
+p2.17
+SELECT
+   my_int,
+   my_json #> '{title}' AS title,
+   my_json #> '{author}' AS author,
+   my_json #> '{published_year}' AS published_year
+FROM t2
+WHERE my_int = 17;
+
+
+
+p2.18
+SELECT '{"a":1, "b":2}'::jsonb @> '{"b":2}'::jsonb AS checked;
+SELECT '{"b":2}'::jsonb <@ '{"a":1, "b":2}'::jsonb  AS checked;
+SELECT '{"a":1, "b":2}'::jsonb ? 'b' AS checked;
+
+
+
+p2.19
+INSERT INTO t2 (my_int, my_json)
+VALUES (
+    18,
+    to_json('{"title": "SQL Certification"}'::json)
+);
+
+SELECT
+   my_int,
+   my_json #> '{title}' AS title
+FROM t2
+WHERE my_int = 18;
+
+SELECT array_to_json('{{1,5},{99,100}}'::int[]) AS checked;
+
+
+INSERT INTO t2 (my_int, my_jsonb)
+VALUES (
+    19,
+    jsonb_build_object(
+        'title', 'Data Visualization',
+        'author', 'Antonia',
+        'published_year', '2023'::jsonb
+    )
+);
+
+SELECT
+   my_int,
+   my_jsonb #> '{title}' AS title,
+   my_jsonb #> '{author}' AS author,
+   my_jsonb #> '{published_year}' AS published_year
+FROM t2
+WHERE my_int = 19;
+ 
+SELECT 
+   my_int, 
+   my_jsonb->>'title' AS title, 
+   my_jsonb->>'author' AS author, 
+  (my_jsonb->>'published_year') AS published_year
+FROM t2 
+WHERE my_int = 19;
+
+
+INSERT INTO t2 (my_int, my_jsonb)
+VALUES (
+    20,
+    jsonb_build_array(
+        '{"title": "SQL Certification"}'::jsonb,
+        '{"author": "Moss"}'::jsonb,
+        '{" published_year ": 2023}'::jsonb
+    )
+);
+
+SELECT 
+   my_int, my_jsonb
+FROM t2 
+WHERE my_int = 20;
+
+SELECT 
+   my_int, 
+   my_jsonb->0->>'title'  AS title, 
+   my_jsonb->1->>'author' AS author, 
+  (my_jsonb->2->>'published_year ')::int AS published_year
+FROM t2 
+WHERE my_int = 20;
+
+
+INSERT INTO t2 (my_int, my_jsonb)
+VALUES (
+    21,
+    to_jsonb('{"title": "DBA Guidebook", "author": "Moss", "published_year": 2023}'::jsonb)
+);
+
+SELECT
+   my_int,
+   my_jsonb->>'title' AS title,
+   my_jsonb->>'author' AS author,
+   (my_jsonb->>'published_year')::int AS published_year
+FROM t2
+WHERE my_int = 21;
+
+
+INSERT INTO t2 (my_int, my_jsonb)
+VALUES (
+  22,
+  array_to_json(ARRAY[jsonb_build_object(
+    'title', 'DBA Guidebook', 'author', 'Moss', 'published_year', 2023)
+    ]
+  )
+);
+
+SELECT
+   my_int,
+   (my_jsonb #> '{0,title}') AS title,
+   (my_jsonb #> '{0,author}') AS author,
+  ((my_jsonb #> '{0,published_year}')::int) AS published_year
+FROM t2
+WHERE my_int = 22;
+
+
+INSERT INTO t2 (my_int, my_jsonb)
+VALUES (
+  23,
+  row_to_json(
+     (SELECT r FROM (SELECT 'DBA Guidebook' AS title, 'Moss' AS author, 2023 AS published_year) AS r)
+    )
+);
+
+SELECT
+   my_int,
+   my_jsonb->>'title' AS title,
+   my_jsonb->>'author' AS author,
+   (my_jsonb->>'published_year')::int AS published_year
+FROM t2
+WHERE my_int = 23;
+
+
+INSERT INTO t2 (my_int, my_jsonb)
+VALUES (
+    24,
+    json_object(
+        ARRAY['title', 'author', 'published_year'],
+        ARRAY['DBA Guidebook', 'Moss', '2023']
+    )::jsonb
+);
+
+SELECT
+   my_int,
+   my_jsonb->>'title' AS title,
+   my_jsonb->>'author' AS author,
+   (my_jsonb->>'published_year')::int AS published_year
+FROM t2
+WHERE my_int = 24;
+
+
+
+p2.20
+SELECT my_int, jsonb_each(my_jsonb) FROM t2 WHERE my_int =24;
+
+
+
+p2.21
+INSERT INTO t2 (my_int, my_xml)
+VALUES (25, '<root><element>Example XML</element></root>');
+
+SELECT my_int, my_xml from t2 where my_int=42;
+
+
+
+p2.22
+CREATE TABLE t4 (
+    my_int            INT,
+    my_varchar_array  VARCHAR[],
+    my_int_array      INT[3],
+    my_numeric_array  NUMERIC[],
+    my_boolean_array  BOOLEAN[],
+    my_date_array     DATE[]
+);
+
+INSERT INTO t4 (my_int, my_varchar_array) VALUES (1, '{"value1", "value2", "value3"}');
+INSERT INTO t4 (my_int, my_int_array) VALUES (2, '{1, 2, 3}');
+INSERT INTO t4 (my_int, my_numeric_array) VALUES (3, '{1.23, 4.56, 7.89}');
+INSERT INTO t4 (my_int, my_boolean_array) VALUES (4, '{true, false, true}');
+
+INSERT INTO t4 (my_int, my_date_array)  
+VALUES (5, '{"2023-05-01", "2023-05-15", "2023-06-01"}');
+
+SELECT my_varchar_array[1] FROM t4 WHERE my_int = 1;
+SELECT my_int_array[2] FROM t4 WHERE my_int = 2;
+SELECT my_numeric_array[3] FROM t4 WHERE my_int = 3;
+SELECT my_boolean_array[1] FROM t4 WHERE my_int = 4;
+SELECT my_date_array[2]    FROM t4 WHERE my_int = 5;
+
+
+
+p2.23
+CREATE TABLE t5 (
+    my_int            INT,
+    my_int4range      INT4RANGE,
+    my_numrange       NUMRANGE,
+    my_tsrange        TSRANGE,     --Timestamp range without time zone
+    my_tstzrange      TSTZRANGE,   --Timestamp range with time zone
+    my_varchar        VARCHAR,
+    my_value          NUMERIC
+);
+
+INSERT INTO t5 (my_int, my_tsrange, my_varchar, my_value)
+VALUES (1, '[2023-08-01 00:00:00, 2023-08-02 00:00:00)', 'USD/EUR', 1.221);
+
+INSERT INTO t5 (my_int, my_tsrange, my_varchar, my_value)
+VALUES (2, '[2023-08-02 00:00:00, 2023-08-03 00:00:00)', 'USD/EUR', 1.222);
+
+INSERT INTO t5 (my_int, my_tsrange, my_varchar, my_value)
+VALUES (3, '[2023-08-03 00:00:00, 2023-08-04 00:00:00)', 'USD/EUR', 1.223);
+
+SELECT my_varchar AS Currency, my_value AS rate FROM t5
+WHERE  my_tsrange  @> '2023-08-03'::TIMESTAMP;
+
+SELECT my_varchar AS Currency, my_value AS rate FROM t5
+WHERE my_tsrange  @> '2023-08-02'::TIMESTAMP;
+
+SELECT my_varchar AS Currency, my_value AS rate FROM t5
+WHERE my_tsrange  @> '2023-08-01'::TIMESTAMP;
+
+INSERT INTO t5 (my_int, my_tstzrange, my_varchar, my_value)
+VALUES (4, '[2023-08-01 00:00:00+8, 2023-08-02 00:00:00+8)', 'USD/EUR', 1.224);
+
+INSERT INTO t5 (my_int, my_tstzrange, my_varchar, my_value)
+VALUES (5, '[2023-08-02 00:00:00+8, 2023-08-03 00:00:00+8)', 'USD/EUR', 1.225);
+
+INSERT INTO t5 (my_int, my_tstzrange, my_varchar, my_value)
+VALUES (6, '[2023-08-03 00:00:00+8, 2023-08-04 00:00:00+8)', 'USD/EUR', 1.226);
+
+SELECT my_varchar AS Currency, my_value AS rate FROM t5
+WHERE my_tstzrange  @> '2023-08-01'::TIMESTAMP WITH TIME ZONE;
+
+SELECT my_varchar AS Currency, my_value AS rate FROM t5
+WHERE my_tstzrange  @> '2023-08-02'::TIMESTAMP WITH TIME ZONE;
+
+SELECT my_varchar AS Currency, my_value AS rate FROM t5
+WHERE my_tstzrange  @> '2023-08-03'::TIMESTAMP WITH TIME ZONE;
+
+
+
+p2.24
+INSERT INTO t5 (my_int, my_int4range, my_varchar, my_value)
+VALUES (11, '[0, 1)', 'New Born', 50000);
+
+INSERT INTO t5 (my_int, my_int4range, my_varchar, my_value)
+VALUES (12, '[1, 7)', 'Kid', 100000);
+
+INSERT INTO t5 (my_int, my_int4range, my_varchar, my_value)
+VALUES (13, '[7, 18)', 'Young', 150000);
+
+INSERT INTO t5 (my_int, my_int4range, my_varchar, my_value)
+VALUES (14, '[18, 60)', 'Adult', 200000);
+
+INSERT INTO t5 (my_int, my_int4range, my_varchar, my_value)
+VALUES (15, '[60, 150)', 'Old', 250000);
+
+SELECT my_varchar, my_value FROM t5 WHERE my_int4range @> 18;
+
+INSERT INTO t5 (my_int, my_numrange, my_varchar, my_value)
+VALUES (21, '[0.00, 50.00)', 'Low Price Range', 0.05);
+
+INSERT INTO t5 (my_int, my_numrange, my_varchar, my_value)
+VALUES (22, '[50.00, 150.00)', 'Mid Price Range', 0.08);
+
+INSERT INTO t5 (my_int, my_numrange, my_varchar, my_value)
+VALUES (23, '[150.00, 1000]', 'High Price Range', 0.10);
+
+SELECT my_varchar, my_numrange, my_value AS extra_discount FROM t5
+WHERE my_numrange @> '50'::NUMERIC;
+
+SELECT my_varchar, my_numrange, my_value AS extra_discount FROM t5
+WHERE my_numrange @> '49.99999'::NUMERIC;
+
+SELECT my_varchar, my_numrange, my_value AS extra_discount FROM t5
+WHERE my_numrange @> '150.00'::NUMERIC;
+
+
+
+p2.25
+INSERT INTO t2 (my_int, my_uuid, my_varchar)
+VALUES (26, 'a0eebc99-9c0b-4ef8-bb6d-6bb9bd380a11', 'Data validation Job');
+
+INSERT INTO t2 (my_int, my_inet, my_varchar)
+VALUES (27, '192.168.0.1', 'Database server IP');
+
+INSERT INTO t2 (my_int, my_cidr, my_varchar)
+VALUES (28, '192.168.0.0/24', 'CIDR Range');
+
+INSERT INTO t2 (my_int, my_macaddr, my_varchar)
+VALUES (29, '08:00:2b:01:02:03', 'MAC Address');
+
+INSERT INTO t2 (my_int, my_macaddr8, my_varchar)
+VALUES (30, '08:00:2b:01:02:03:04:05', 'MAC Address 8'); 
+
+
+
+p2.26
+INSERT INTO t2 (my_int, my_text, my_tsvector)
+VALUES (
+   31, 
+   'Using dedicated data types for UUID, CIDR, INET, MACADDR, and MACADDR8 can lead to better data management', 
+   to_tsvector('english', 'Using dedicated data types for UUID, CIDR, INET, MACADDR, and MACADDR8 can lead to better data management')
+);
+
+INSERT INTO t2 (my_int, my_text, my_tsvector)
+VALUES (
+   32, 
+   'As database systems evolve, they can introduce optimizations and enhancements specific to these data types. Storing the data in dedicated columns will allow you to take advantage of such improvements without needing to change your data model.', 
+   to_tsvector('english', 'As database systems evolve, they can introduce optimizations and enhancements specific to these data types. Storing the data in dedicated columns will allow you to take advantage of such improvements without needing to change your data model.')
+);
+
+INSERT INTO t2 (my_int, my_text, my_tsvector)
+VALUES (
+   33, 
+   ' Storing MAC addresses alongside network configuration settings for various devices to ensure proper configuration and connectivity.', 
+   to_tsvector('english', 'Storing MAC addresses alongside network configuration settings for various devices to ensure proper configuration and connectivity.'));
+
+SELECT my_text, my_tsvector FROM t2 WHERE my_int =31;
+
+SELECT my_int, my_text
+FROM t2
+WHERE my_tsvector @@ to_tsquery('english', 'data & types')
+ORDER BY ts_rank_cd(my_tsvector, to_tsquery('english', 'better & data')) DESC;
+
+SELECT my_int, my_text
+FROM t2
+WHERE my_tsvector @@ to_tsquery('english', 'data & types')
+ORDER BY ts_rank_cd(my_tsvector, to_tsquery('english', ' improvements & enhancements')) DESC;
+
+
+
+p3.
+CREATE DATABASE about_x;
+
+\l
+\c about_x
+
+CREATE SCHEMA car;
+CREATE SCHEMA space;
+CREATE SCHEMA common;
+
+\dn
+
+
+
+p3.1
+-- Create the ENUM about allowed values of title
+CREATE TYPE ENUM_TITLE AS ENUM ('Mr.', 'Ms.', 'Mrs.', 'Dr.', 'Prof.');
+
+-- Create the Shareholder table under the common schema
+CREATE TABLE common.shareholder (
+    shareholder_id VARCHAR(10) PRIMARY KEY,
+    title       ENUM_TITLE,
+    first_name  VARCHAR(30) NOT NULL,
+    middle_name VARCHAR(30),
+    last_name   VARCHAR(30) NOT NULL,
+    email       VARCHAR(30) NOT NULL,
+    phone       VARCHAR(30) NOT NULL,
+    address_1   VARCHAR(30) NOT NULL,
+    address_2   VARCHAR(30),
+    address_3   VARCHAR(30),
+    address_4   VARCHAR(30),
+    city        VARCHAR(30) NOT NULL,
+    country     VARCHAR(30) NOT NULL,
+    postal_code VARCHAR(8) NOT NULL
+);
+
+-- Create indexes
+CREATE INDEX shareholder_idx_01 ON common.shareholder (shareholder_id);
+CREATE INDEX shareholder_idx_02 ON common.shareholder (first_name, last_name, shareholder_id);
+
+-- Insert sample data
+INSERT INTO common.shareholder (
+ shareholder_id, title, first_name, middle_name, last_name, email, phone,
+ address_1, address_2, address_3, address_4,
+ city, country, postal_code
+)
+VALUES(
+ 'S000000001',
+ 'Mr.', 'Elon', 'Reeve', 'Musk','Elon.musk@x.com', '+1-010101010101',
+ 'Unit 1 X Corp Building', NULL, NULL, NULL, 'Los Angeles', 'USA', '912345');
+
+
+
+p3.2
+-- Create the Shareholder Registry table under the common schema
+CREATE TABLE common.shareholder_registry (
+    company        VARCHAR(50) NOT NULL,
+    shareholder_id VARCHAR(10) NOT NULL,
+    shares         BIGINT NOT NULL,
+    PRIMARY KEY (shareholder_id, company),
+    FOREIGN KEY (shareholder_id) REFERENCES common.shareholder (shareholder_id)
+);
+
+-- Create index
+CREATE INDEX share_reg_idx_01 ON common.shareholder_registry (company, shareholder_id);
+
+-- Insert sample data
+INSERT INTO common.shareholder_registry (
+ company, shareholder_id, shares)
+VALUES ('xSpace Inc', 'S000000001', 100000000);
+
+INSERT INTO common.shareholder_registry (
+ company, shareholder_id, shares)
+VALUES ('E Car Inc', 'S000000001', 200000000);
+
+INSERT INTO common.shareholder_registry (
+ company, shareholder_id, shares)
+VALUES ('X Inc', 'S000000001', 300000000);
+
+SELECT s.title, s.first_name, s.last_name, sr.shares
+FROM common.shareholder s
+JOIN common.shareholder_registry sr ON s.shareholder_id = sr.shareholder_id;
+
+
+
+p3.3
+-- Create the xSpace Travel Schedule table under the space schema
+CREATE TABLE space.space_travel_schedule (
+    trip_id        VARCHAR(10) PRIMARY KEY,
+    destination    VARCHAR(100) NOT NULL,
+    departure_from VARCHAR(100) NOT NULL,
+    departure_dtm  TIMESTAMP(0) NOT NULL,
+    return_dtm     TIMESTAMP(0) NOT NULL,
+    price          MONEY NOT NULL
+);
+
+-- Create indexes
+CREATE INDEX space_idx_01 ON space.space_travel_schedule (trip_id);
+CREATE INDEX space_idx_02 ON space.space_travel_schedule (destination, trip_id);
+
+-- Insert sample data
+INSERT INTO space.space_travel_schedule (
+ trip_id, destination, departure_from,
+ departure_dtm, return_dtm, price)
+VALUES (
+ 'S000000001', 'Moon', 'Los Angeles, USA',
+ '2024-12-31 23:59:59', '2025-01-31 00:00:00', 1000000.00);
+
+
+
+
+p3.4
+-- Create the Customer table under the car schema
+CREATE TABLE car.customer (	 
+    customer_id VARCHAR(20) PRIMARY KEY,
+    title       ENUM_TITLE,
+    first_name  VARCHAR(30) NOT NULL,
+    middle_name VARCHAR(30),
+    last_name   VARCHAR(30) NOT NULL,
+    email       VARCHAR(30),
+    phone       VARCHAR(30),
+    address_1   VARCHAR(30),
+    address_2   VARCHAR(30),
+    address_3   VARCHAR(30),
+    address_4   VARCHAR(30),
+    city        VARCHAR(30),
+    country     VARCHAR(30),
+    postal_code VARCHAR(8),
+    tweeter_account_id VARCHAR(64)
+);
+
+-- Create index
+CREATE INDEX customer_idx_01 ON car.customer (customer_id);
+
+-- Insert sample data
+INSERT INTO car.customer (
+ customer_id, title, first_name, middle_name, last_name,
+ email, phone,  
+ address_1, address_2, address_3, address_4,
+ city, country, postal_code, 
+ tweeter_account_id)
+VALUES (
+ 'C230000001', 'Mr.', 'Thomas', 'S', 'Bright',
+ 'thomas@thomassbright.org', '+01-123456789', 
+ 'Unit 1, First Street', NULL, NULL, NULL,
+ 'Los Angeles', 'USA', '923456',
+ '@thomassbright');
+
+
+
+p3.5
+-- Create the Space Trip table under the space schema
+CREATE TABLE space.space_trip (
+    trip_id     VARCHAR(10) PRIMARY KEY,
+    customer_id VARCHAR(10) NOT NULL,
+    fee         MONEY NOT NULL,
+    amount_paid MONEY NOT NULL,
+    FOREIGN KEY (customer_id) REFERENCES car.customer(customer_id)
+);
+
+-- Create indexes
+CREATE INDEX trip_idx_01 ON space.space_trip (trip_id, customer_id);
+CREATE INDEX trip_idx_02 ON space.space_trip (customer_id, trip_id);
+
+-- Insert sample data
+INSERT INTO space.space_trip (trip_id, customer_id, fee, amount_paid)
+VALUES ('S000000001', 'C230000001', '1,000,000.00', '900,000.00');
+
+SELECT st.trip_id, sch.destination, sch.departure_dtm,
+       c.first_name, c.last_name, 
+       st.amount_paid
+FROM space.space_trip st
+JOIN car.customer c ON st.customer_id = c.customer_id
+JOIN space.space_travel_schedule sch ON st.trip_id = sch.trip_id;
+
+
+
+
+p3.6
+-- Create the Product Category table under the car schema
+CREATE TABLE car.category (
+    category_id VARCHAR(20) PRIMARY KEY,
+    description TEXT NOT NULL
+);
+
+-- Create the Product Category table under the car schema
+CREATE TABLE car.category (
+    category_id VARCHAR(20) PRIMARY KEY,
+    description TEXT NOT NULL
+);
+
+-- Create index
+CREATE INDEX category_idx_01 ON car.category (category_id);
+
+-- Insert sample data
+INSERT INTO car.category (category_id, description)
+VALUES ('CT000001', 'Advanced model');
+
+
+
+p3.7
+-- Create the Category Designer table under the car schema
+CREATE TABLE car.category_designer (
+    category_id VARCHAR(20) REFERENCES car.category (category_id),
+    designer    VARCHAR(50) NOT NULL,
+    PRIMARY KEY (category_id, designer)
+);
+-- PRIMARY KEY (category_id, designer):  specifies that the combination of the category_id and designer columns will be the primary key
+CREATE INDEX category_designer_idx_01 ON car.category_designer (category_id, designer);
+
+INSERT INTO car.category_designer (category_id, designer)
+VALUES ('CT000001', 'Arthur');
+
+INSERT INTO car.category_designer (category_id, designer)
+VALUES ('CT000001', 'Antonia');
+
+
+
+p3.8
+-- Create the Product table under the car schema
+CREATE TABLE car.product (
+    product_id   VARCHAR(20) PRIMARY KEY,
+    product_name TEXT NOT NULL,
+    sku          VARCHAR(20) NOT NULL,
+    origin       VARCHAR(20) NOT NULL,
+    color        VARCHAR(20) NOT NULL,
+    category_id  VARCHAR(20) NOT NULL,
+    price        MONEY NOT NULL,
+    FOREIGN KEY (category_id) REFERENCES car.category(category_id)
+);
+
+-- Create indexes
+CREATE INDEX product_idx_01 ON car.product (product_id);
+CREATE INDEX product_idx_02 ON car.product (category_id, product_id);
+CREATE INDEX product_idx_03 ON car.product (origin, product_id);
+
+-- Insert sample data
+INSERT INTO car.product (
+ product_id, product_name, sku, origin, color,
+ category_id, price)
+VALUES (
+ 'P00000001', 'Model K', 'S0001-20841-2233-331', 'USA', 'Black',
+ 'CT000001', 39999.99);
+
+SELECT category_id, designer FROM car.category_designer;
+
+SELECT
+    p.product_id,
+    p.product_name,
+    p.price,
+    p.sku,
+    p.category_id,
+    c.description AS category_description,
+    ARRAY_AGG(cd.designer) AS designers
+FROM car.product p
+JOIN car.category c ON p.category_id = c.category_id
+JOIN car.category_designer cd ON p.category_id = cd.category_id
+GROUP BY p.product_id, p.product_name, p.price, p.sku, p.category_id, c.description;
+
+SELECT
+    p.product_id,
+    p.product_name,
+    p.price,
+    p.sku,
+    p.category_id,
+    c.description AS category_description,
+    cd.designer AS designers
+FROM car.product p
+JOIN car.category c ON p.category_id = c.category_id
+JOIN car.category_designer cd ON p.category_id = cd.category_id;
+
+
+
+p3.9
+-- Create the Order Header table under the car schema
+CREATE TABLE car.order_header (
+    order_no           VARCHAR(20) NOT NULL,
+    customer_id        VARCHAR(20) REFERENCES car.customer (customer_id),
+    order_dtm          TIMESTAMP(0),
+    delivery_address_1 VARCHAR(30),
+    delivery_address_2 VARCHAR(30),
+    delivery_address_3 VARCHAR(30),
+    delivery_address_4 VARCHAR(30),
+    discount_rate      NUMERIC(5,2),
+    order_net_total    MONEY,
+    PRIMARY KEY (order_no, customer_id)
+);
+
+-- Create index
+CREATE INDEX order_header_idx_01 ON car.order_header (order_no, customer_id);
+
+-- Insert sample data
+INSERT INTO car.order_header (
+    order_no, customer_id, order_dtm, delivery_address_1, 
+    discount_rate, order_net_total)
+VALUES (
+   'OR2023000001', 'C230000001', '2023-08-03 12:00:00', '123 Main St', 
+   0.10, 71999.98);
+
+
+
+p3.10
+-- Create the Order Detail table under the car schema
+CREATE TABLE car.order_detail (
+    order_no   VARCHAR(20) NOT NULL,
+    product_id VARCHAR(20) REFERENCES car.product (product_id),
+    qty        NUMERIC(11,2),
+    unit_price NUMERIC(15,2),
+    amount     NUMERIC(15,2),
+    PRIMARY KEY (order_no, product_id)
+);
+
+-- Create index
+CREATE INDEX order_detail_idx_01 ON car.order_detail (order_no, product_id);
+
+-- Insert sample data
+INSERT INTO car.order_detail (order_no, product_id, qty, unit_price, amount)
+VALUES ('OR2023000001', 'P00000001', 2, 39999.99, 79999.98);
+
+
+
+p3.11
+ALTER TABLE car.customer
+ADD CONSTRAINT customer_tweeter_account_id_unique UNIQUE (tweeter_account_id);
+
+
+-- Create the Tweets table under the car schema
+CREATE TABLE car.tweet (
+    tweet_message_id   VARCHAR(64) PRIMARY KEY,
+    tweeter_account_id VARCHAR(64) REFERENCES car.customer(tweeter_account_id),
+    content            TEXT,
+    publish_dtm        TIMESTAMP(6),
+    image              BYTEA,
+    video              VARCHAR(100),
+    url                VARCHAR(100)
+);
+
+-- Create index
+CREATE INDEX tweet_idx_01 ON car.tweet (tweet_message_id, tweeter_account_id);
+
+-- Insert sample data
+INSERT INTO car.tweet (
+ tweet_message_id, tweeter_account_id, 
+ content, 
+ publish_dtm, image, video, url)
+VALUES (
+'T000000001', '@thomassbright',
+ 'Excited to share our latest electric car model!', 
+ '2023-08-03 12:00:00.000000', NULL, NULL, NULL);
+
+
+
+
+p4
+--Connect to your new database, about_x
+\c about_x
+
+CREATE TABLE t6 (
+    id INT PRIMARY KEY,
+    name VARCHAR(50),
+    description VARCHAR(100)
+);
+
+CREATE TABLE t7 (
+    id INT PRIMARY KEY,
+    t6_id INT,
+    details VARCHAR(200),
+    FOREIGN KEY (t6_id) REFERENCES t6(id)
+);
+
+INSERT INTO t6 (id, name, description)
+VALUES (1, 'Item A', 'Description for Item A'),
+       (2, 'Item B', 'Description for Item B'),
+       (3, 'Item C', 'Description for Item C'),
+       (4, 'Item D', 'Description for Item D'),
+       (5, 'Item E', 'Description for Item E');
+
+INSERT INTO t7 (id, t6_id, details)
+VALUES (1, 1, 'Details for Item A'),
+       (2, 2, 'Details for Item B'),
+       (3, 1, 'Details for Item A'),
+       (4, 3, 'Details for Item C'),
+       (5, 2, 'Details for Item B');
+
+\dt
+
+
+
+p4.1
+--Connect to your new database, about_x
+\c about_x
+
+ALTER TABLE t6
+ADD COLUMN new_column VARCHAR(50);
+
+INSERT INTO t6 (id, name, description, new_column)
+VALUES (6, 'Item F', 'Description for Item F', '600'),
+       (7, 'Item G', 'Description for Item G', '700'),
+       (8, 'Item H', 'Description for Item H', '800');
+
+\d t7
+
+ALTER TABLE t6
+ALTER COLUMN new_column SET DATA TYPE INT USING new_column::INT;
+
+ALTER TABLE t6
+RENAME COLUMN new_column TO new_int;
+
+\d t6
+
+SELECT * FROM t6;
+
+
