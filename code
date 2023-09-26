@@ -185,7 +185,7 @@ INSERT INTO t2 (my_int, my_char_varying, my_varchar, my_char, my_text)
 VALUES (8, 'abcdefghijklmnopqrst', 'abcdefghijklmnopqrst', 
 'abcdefghijklmnopqrstu', 'abcdefghijklmnopqrstuvwxyz');
 
-SELECT my_char_varying, my_varchar, my_char, my_text FROM t2 WHERE my_int =7;
+SELECT my_char_varying, my_varchar, my_char, my_text FROM t2 WHERE my_int = 8;
 
 INSERT INTO t2 (my_int, my_char_varying, my_varchar, my_char, my_text)
 VALUES (9, 'abcdefghijklmnopqrstu', 'abcdefghijklmnopqrstu', 'abcdefghijklmnopqrstu', 'abcdefghijklmnopqrstuvwxyz');
